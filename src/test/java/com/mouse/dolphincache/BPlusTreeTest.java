@@ -29,10 +29,11 @@ public class BPlusTreeTest {
         BPlusTree bPlusTree = new BPlusTree(m);
         val list = new ArrayList<Integer>();
         val r = new Random();
-        for (int i = 0; i < 1000000; i++) {
+        for (int i = 0; i < 100000; i++) {
+            val key = r.nextInt(2000);
             val value = r.nextDouble() * 1000d;
-            bPlusTree.insert(i, value);
-            list.add(i);
+            bPlusTree.insert(key, value);
+            list.add(key);
         }
 
         val sw = new StopWatch();
