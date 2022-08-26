@@ -3,6 +3,9 @@ package com.mouse.dolphincache;
 
 import java.util.*;
 
+/**
+ * 这根本不是B+树 而是棵B树，每个node上都有value
+ */
 public class BPlusTree {
     int m;
     InternalNode root;
