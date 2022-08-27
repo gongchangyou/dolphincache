@@ -342,6 +342,7 @@ public class BPlusTree {
         }
     }
 
+    //not support duplicate keys
     public Double search(int key) {
 
         if (isEmpty()) {
@@ -362,6 +363,8 @@ public class BPlusTree {
 
     /**
      * key range: [lowerBound,upperBound]
+     * latency too large
+     * maybe there's no link between leafnodes
      * @param lowerBound
      * @param upperBound
      * @return
