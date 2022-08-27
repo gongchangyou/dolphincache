@@ -1,11 +1,19 @@
 package com.mouse.dolphincache;
 
+import btree4j.BTree;
+import btree4j.BTreeCallback;
+import btree4j.BTreeException;
+import btree4j.Value;
+import btree4j.indexer.BasicIndexQuery;
+import btree4j.utils.io.FileUtils;
 import com.mouse.dolphincache.BPlusTree;
 import lombok.val;
+import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.util.StopWatch;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -28,6 +36,7 @@ public class BPlusTreeTest {
 
     @Test
     void searchDuplicateKey(int m) {
+        val bTree = getBTree();
         BPlusTree bPlusTree = new BPlusTree(m);
         val list = new ArrayList<Integer>();
         val r = new Random();
@@ -36,6 +45,11 @@ public class BPlusTreeTest {
             val value = r.nextDouble() * 1000d;
             bPlusTree.insert(key, value);
             list.add(key);
+            try {
+                bTree.addValue( new Value(key), Double.valueOf(value).hashCode());
+            } catch (BTreeException e) {
+                e.printStackTrace();
+            }
         }
 
         val sw = new StopWatch();
@@ -48,11 +62,40 @@ public class BPlusTreeTest {
         }).collect(Collectors.toList());
         sw.stop();
 
-        System.out.println("searchDuplicateKey m="+ m+" result=" + result.size() + "result2 =" +result2.size() + sw.prettyPrint());
+        sw.start("btree4j");
+        val result3 = new ArrayList<>();
+
+        try {
+            bTree.search(new BasicIndexQuery.IndexConditionBW(new Value(1000), new Value(1000)),
+                    new BTreeCallback() {
+
+                        @Override
+                        public boolean indexInfo(Value value, long pointer) {
+                            //System.out.println(pointer);
+                            result3.add(pointer);
+                            return true;
+                        }
+
+                        @Override
+                        public boolean indexInfo(Value key, byte[] value) {
+                            throw new UnsupportedOperationException();
+                        }
+                    });
+        } catch (BTreeException e) {
+            e.printStackTrace();
+        }
+        sw.stop();
+
+        System.out.println("searchDuplicateKey m="+ m
+                +" result=" + result.size()
+                + "result2 =" +result2.size()
+                + "result3 =" +result3.size()
+                + sw.prettyPrint());
     }
 
     @Test
     void searchRange(int m) {
+        val bTree = getBTree();
         BPlusTree bPlusTree = new BPlusTree(m);
         val list = new ArrayList<Integer>();
         val r = new Random();
@@ -61,6 +104,14 @@ public class BPlusTreeTest {
             val value = r.nextDouble() * 1000d;
             bPlusTree.insert(key, value);
             list.add(key);
+            try {
+                bTree.addValue( new Value(key), Double.valueOf(value).hashCode());
+            } catch (BTreeException e) {
+                System.out.println(e);
+//                e.printStackTrace();
+            } catch (Exception e) {
+                System.out.println(e);
+            }
         }
 
         val sw = new StopWatch();
@@ -73,7 +124,32 @@ public class BPlusTreeTest {
         }).collect(Collectors.toList());
         sw.stop();
 
-        System.out.println("m="+ m+" result=" + result.size() + "result2 =" +result2.size() + sw.prettyPrint());
+        sw.start("btree4j");
+        val result3 = new ArrayList<>();
+        try {
+            bTree.search(new BasicIndexQuery.IndexConditionBW(new Value(1000), new Value(2000)),
+                    new BTreeCallback() {
+
+                        @Override
+                        public boolean indexInfo(Value value, long pointer) {
+                            //System.out.println(pointer);
+                            result3.add(pointer);
+                            return true;
+                        }
+
+                        @Override
+                        public boolean indexInfo(Value key, byte[] value) {
+                            throw new UnsupportedOperationException();
+                        }
+                    });
+        } catch (BTreeException e) {
+            e.printStackTrace();
+        }
+        sw.stop();
+
+        System.out.println("searchRange m="+ m+" result=" + result.size() + "result2 =" +result2.size()
+                + "result3=" + result3.size()
+                + sw.prettyPrint());
     }
 
     @Test
@@ -100,5 +176,24 @@ public class BPlusTreeTest {
         sw.stop();
 
         System.out.println("search exactly index m="+ m+" result=" + result + "result2 =" +result2.size() + sw.prettyPrint());
+    }
+
+
+    private BTree getBTree() {
+        File tmpDir = FileUtils.getTempDir();
+        Assert.assertTrue(tmpDir.exists());
+        File tmpFile = new File(tmpDir, "BTreeTest1.idx");
+        tmpFile.deleteOnExit();
+        if (tmpFile.exists()) {
+            Assert.assertTrue(tmpFile.delete());
+        }
+
+        val bTree =  new BTree(tmpFile);
+        try {
+            bTree.init(false);
+        } catch (BTreeException e) {
+            e.printStackTrace();
+        }
+        return bTree;
     }
 }
