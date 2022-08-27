@@ -93,7 +93,6 @@ public class BPlusTreeTest {
                 + sw.prettyPrint());
     }
 
-    @Test
     void searchRange(int m) {
         val bTree = getBTree();
         BPlusTree bPlusTree = new BPlusTree(m);

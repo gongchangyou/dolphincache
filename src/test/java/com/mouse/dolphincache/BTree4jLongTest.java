@@ -6,10 +6,8 @@ import btree4j.BTreeException;
 import btree4j.Value;
 import btree4j.indexer.BasicIndexQuery;
 import btree4j.utils.io.FileUtils;
-import lombok.val;
 import org.junit.Assert;
 import org.junit.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.File;
 
@@ -18,7 +16,7 @@ import java.io.File;
  * @version 1.0
  * @date 2022/8/27 09:35
  */
-public class BTree4jTest {
+public class BTree4jLongTest {
 
     @Test
     public void test() throws BTreeException {
@@ -33,20 +31,20 @@ public class BTree4jTest {
         BTree btree = new BTree(tmpFile);
         btree.init(/* bulkload */ false);
 
-        for (int i = 0; i < 1000; i++) {
-            Value k = new Value("k" + i);
+        for (long i = 0; i < 1000L; i++) {
+            Value k = new Value( i);
             long v = i;
             btree.addValue(k, v);
         }
 
-        for (int i = 0; i < 1000; i++) {
-            Value k = new Value("k" + i);
-            long expected = i;
-            long actual = btree.findValue(k);
-            Assert.assertEquals(expected, actual);
-        }
+//        for (long i = 0; i < 1000L; i++) {
+//            Value k = new Value(i);
+//            long expected = i;
+//            long actual = btree.findValue(k);
+//            Assert.assertEquals(expected, actual);
+//        }
 
-        btree.search(new BasicIndexQuery.IndexConditionBW(new Value("k" + 749), new Value("k" + 862)),
+        btree.search(new BasicIndexQuery.IndexConditionBW(new Value(749L), new Value( 862L)),
                 new BTreeCallback() {
 
                     @Override
