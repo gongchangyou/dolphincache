@@ -29,8 +29,8 @@ public class BPlusTreeTest {
     void multiSearch() {
         for (int m = 2; m < 10; m++) {
             searchRange(m);
-            searchIndex(m);
-            searchDuplicateKey(m);
+//            searchIndex(m);
+//            searchDuplicateKey(m);
         }
     }
 
@@ -99,13 +99,13 @@ public class BPlusTreeTest {
         BPlusTree bPlusTree = new BPlusTree(m);
         val list = new ArrayList<Integer>();
         val r = new Random();
-        for (int i = 0; i < 100000; i++) {
+        for (int i = 0; i < 1000000; i++) {
             val key = r.nextInt(2000);
             val value = r.nextDouble() * 1000d;
             bPlusTree.insert(key, value);
             list.add(key);
             try {
-                bTree.addValue( new Value(key), Double.valueOf(value).hashCode());
+                bTree.addValue( new Value(key), key);
             } catch (BTreeException e) {
                 System.out.println(e);
 //                e.printStackTrace();
