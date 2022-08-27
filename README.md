@@ -31,10 +31,12 @@ callback.indexInfo(this.keys[i], this.ptrs[i]);
 
 10w - 100w 时 ， B+tree性能优于流式， 大于1000w 数据可能overflow.
 
-但是 IndexConditionBW 实例化依然耗时较久 , 居然占到了search耗时的一半。
+但是 IndexConditionBW 首次实例化耗时较久 , 会占到了search耗时的一半。 大概因为JIT,所以后续再创建耗时会下来。
 
 000001026  000%  o1
 000000170  000%  o2
 000504932  011%  IndexConditionBW
 001124575  025%  search
 002851406  064%  list
+
+多调用search几次性能也会提升，跟steam().filter 可以拉开10~20倍的差距，btree4j还是非常快的。
