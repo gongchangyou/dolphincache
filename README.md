@@ -3,17 +3,23 @@ b+tree based cache
 
 本意是想在内存中构造出一棵B+树，希望根据索引查询能够更快一些
 
-
-平衡树表现 和 极端情况比如只有半边的树 都还不如使用 list.stream().filter() 直接流式筛选一把梭。
 1. search 单个元素 B树效果拔群！ m在 [3,9] 都能做到 和 list.stream().filter() 1:99的耗时, m=4或5时效果最好.
 2. 如果我们做成一棵真正的B+树, 把value放到leaf上 ，且 每个leafNode指向下一个leaf(sibling)， 我想范围查询的速度会快很多
 
 BPlusTree 在元素为1000时,效果不明显，耗时大约是流式查找的20%~100%
-总数为100,000~ 1,000,000，且每次范围查询的范围不太大(相邻的500个)的效果最好, 耗时会锐减到list查找的百分之一!
+
+范围查询：总数为100,000~ 1,000,000，且每次查询的范围不太大(相邻的500个)的效果最好, 耗时会锐减到list查找的十分之一!
+
+例如: select * from person where age between 20 and 50;
+
+单值查询， 耗时会锐减到list查找的1% ~ 10%
+
+例如: select * from person where age = 20;
+
 具体可以执行 LocalCacheTest.personTest
 
 
-### 开源组件 btree4j
+### 开源组件 btree4j  @Deprecated
 ```
 <dependency>
     <groupId>io.github.myui</groupId>

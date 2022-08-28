@@ -52,4 +52,40 @@ public class LocalCacheTest {
         }
 
     }
+
+
+    @SneakyThrows
+    @Test
+    void personEqualTest() {
+        LocalCache<Person> lc = LocalCache.<Person>builder().build();
+        val list = new ArrayList<Person>();
+        for (int i = 0; i < 1000000; i++) {
+            val p = Person.builder()
+                    .id(i)
+                    .name("name" + i)
+                    .age(i)
+                    .build();
+            lc.insert(p);
+            list.add(p);
+        }
+
+        //you'd better run several times. JIT will speed up b+tree search
+        val r = new Random();
+        for (int i = 0; i < 10; i++) {
+            val end = 1000;
+            val start = 1000;
+            val sw = new StopWatch();
+            sw.start("b+tree");
+            val result = lc.search(Person.class.getDeclaredField("age"), start, end);
+            sw.stop();
+            sw.start("stream");
+            list.stream().filter(p -> p.getAge() >= start && p.getAge() <= end).collect(Collectors.toList());
+            sw.stop();
+
+            System.out.println("start="+start
+                    +"end="+end
+                    + sw.prettyPrint());
+        }
+
+    }
 }
