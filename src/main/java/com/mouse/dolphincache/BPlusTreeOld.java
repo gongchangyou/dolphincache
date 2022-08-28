@@ -1,34 +1,34 @@
 // Searching on a B+ tree in Java
 package com.mouse.dolphincache;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
+import java.util.*;
 
-public class BPlusTree <T> {
+public class BPlusTreeOld {
     int m;
-    InternalNode<T> root;
-    LeafNode<T> firstLeaf;
+    InternalNode root;
+    LeafNode firstLeaf;
 
     // Binary search program
-    private int binarySearch(DictionaryPair<T>[] dps, int numPairs, Comparable t) {
+    private int binarySearch(DictionaryPair[] dps, int numPairs, int t) {
         Comparator<DictionaryPair> c = new Comparator<DictionaryPair>() {
             @Override
             public int compare(DictionaryPair o1, DictionaryPair o2) {
-                return o1.key.compareTo(o2.key);
+                Integer a = o1.key;
+                Integer b = o2.key;
+                return a.compareTo(b);
             }
         };
         return Arrays.binarySearch(dps, 0, numPairs, new DictionaryPair(t, 0), c);
     }
 
     // Find the leaf node
-    private LeafNode findLeafNode(Comparable key) {
+    private LeafNode findLeafNode(int key) {
 
-        Comparable[] keys = this.root.keys;
+        Integer[] keys = this.root.keys;
         int i;
 
         for (i = 0; i < this.root.degree - 1; i++) {
-            if (key.compareTo(keys[i]) < 0 ) {
+            if (key < keys[i]) {
                 break;
             }
         }
@@ -42,13 +42,13 @@ public class BPlusTree <T> {
     }
 
     // Find the leaf node
-    private LeafNode findLeafNode(InternalNode node, Comparable key) {
+    private LeafNode findLeafNode(InternalNode node, int key) {
 
-        Comparable[] keys = node.keys;
+        Integer[] keys = node.keys;
         int i;
 
         for (i = 0; i < node.degree - 1; i++) {
-            if (key.compareTo( keys[i]) < 0 ){
+            if (key < keys[i]) {
                 break;
             }
         }
@@ -100,7 +100,7 @@ public class BPlusTree <T> {
         } else if (in.rightSibling != null && in.rightSibling.isLendable()) {
             sibling = in.rightSibling;
 
-            Comparable borrowedKey = sibling.keys[0];
+            int borrowedKey = sibling.keys[0];
             Node pointer = sibling.childPointers[0];
 
             in.keys[in.degree - 1] = parent.keys[0];
@@ -218,8 +218,8 @@ public class BPlusTree <T> {
         InternalNode parent = in.parent;
 
         int midpoint = getMidpoint();
-        Comparable newParentKey = in.keys[midpoint];
-        Comparable[] halfKeys = splitKeys(in.keys, midpoint);
+        int newParentKey = in.keys[midpoint];
+        Integer[] halfKeys = splitKeys(in.keys, midpoint);
         Node[] halfPointers = splitChildPointers(in, midpoint);
 
         in.degree = linearNullSearch(in.childPointers);
@@ -240,7 +240,7 @@ public class BPlusTree <T> {
 
         if (parent == null) {
 
-            Comparable[] keys = new Integer[this.m];
+            Integer[] keys = new Integer[this.m];
             keys[0] = newParentKey;
             InternalNode newRoot = new InternalNode(this.m, keys);
             newRoot.appendChildPointer(in);
@@ -261,9 +261,9 @@ public class BPlusTree <T> {
         }
     }
 
-    private Comparable[] splitKeys(Comparable[] keys, int split) {
+    private Integer[] splitKeys(Integer[] keys, int split) {
 
-        Comparable[] halfKeys = new Comparable[this.m];
+        Integer[] halfKeys = new Integer[this.m];
 
         keys[split] = null;
 
@@ -275,7 +275,7 @@ public class BPlusTree <T> {
         return halfKeys;
     }
 
-    public void insert(Comparable key, T value) {
+    public void insert(int key, double value) {
         if (isEmpty()) {
 
             LeafNode ln = new LeafNode(this.m, new DictionaryPair(key, value));
@@ -296,14 +296,14 @@ public class BPlusTree <T> {
 
                 if (ln.parent == null) {
 
-                    Comparable[] parent_keys = new Integer[this.m];
+                    Integer[] parent_keys = new Integer[this.m];
                     parent_keys[0] = halfDict[0].key;
                     InternalNode parent = new InternalNode(this.m, parent_keys);
                     ln.parent = parent;
                     parent.appendChildPointer(ln);
 
                 } else {
-                    Comparable newParentKey = halfDict[0].key;
+                    int newParentKey = halfDict[0].key;
                     ln.parent.keys[ln.parent.degree - 1] = newParentKey;
                     Arrays.sort(ln.parent.keys, 0, ln.parent.degree);
                 }
@@ -340,7 +340,7 @@ public class BPlusTree <T> {
     }
 
     //not support duplicate keys
-    public T search(Comparable key) {
+    public Double search(int key) {
 
         if (isEmpty()) {
             return null;
@@ -348,7 +348,7 @@ public class BPlusTree <T> {
 
         LeafNode ln = (this.root == null) ? this.firstLeaf : findLeafNode(key);
 
-        DictionaryPair<T>[] dps = ln.dictionary;
+        DictionaryPair[] dps = ln.dictionary;
         int index = binarySearch(dps, ln.numPairs, key);
 
         if (index < 0) {
@@ -358,7 +358,7 @@ public class BPlusTree <T> {
         }
     }
 
-    private LeafNode getRightMostLeafNode(Comparable upperBound) {
+    private LeafNode getRightMostLeafNode(int upperBound) {
         //从root的 找到 lowerBound的 那个leftNode
         Node currNode = this.root;
         while (currNode != null) {
@@ -369,7 +369,7 @@ public class BPlusTree <T> {
             for (int i = 0; i < ((InternalNode) currNode).keys.length; i++) {
 
                 if (((InternalNode) currNode).keys[i] != null) {
-                    if (((InternalNode) currNode).keys[i].compareTo(upperBound) > 0) {
+                    if (((InternalNode) currNode).keys[i] > upperBound) {
                         currNode = ((InternalNode) currNode).childPointers[i];
                         break;
                     }
@@ -383,7 +383,7 @@ public class BPlusTree <T> {
         return null;
     }
 
-    private LeafNode getLeftMostLeafNode(Comparable lowerBound) {
+    private LeafNode getLeftMostLeafNode(int lowerBound) {
         //从root的 找到 lowerBound的 那个leftNode
         Node currNode = this.root;
         while (currNode != null) {
@@ -394,7 +394,7 @@ public class BPlusTree <T> {
             for (int i = 0; i < ((InternalNode) currNode).keys.length; i++) {
 
                 if (((InternalNode) currNode).keys[i] != null) {
-                    if (((InternalNode) currNode).keys[i].compareTo(lowerBound) > 0) {
+                    if (((InternalNode) currNode).keys[i] > lowerBound) {
                         currNode = ((InternalNode) currNode).childPointers[i];
                         break;
                     }
@@ -414,8 +414,8 @@ public class BPlusTree <T> {
      * @param upperBound
      * @return
      */
-    public ArrayList<T> search(Comparable lowerBound, Comparable upperBound, Condition<T> condition) {
-        ArrayList<T> values = new ArrayList<>();
+    public ArrayList<Double> search(int lowerBound, int upperBound) {
+        ArrayList<Double> values = new ArrayList<Double>();
 
         //确定起点和终点
         LeafNode currNode = getLeftMostLeafNode(lowerBound);
@@ -424,13 +424,13 @@ public class BPlusTree <T> {
         while (currNode != rightNode.rightSibling) {
 
             DictionaryPair dps[] = currNode.dictionary;
-            for (DictionaryPair<T> dp : dps) {
+            for (DictionaryPair dp : dps) {
 
                 if (dp == null) {
                     break;
                 }
 
-                if (condition == null || condition.check(dp.key, dp.value)) {
+                if (lowerBound <= dp.key && dp.key <= upperBound) {
                     values.add(dp.value);
                 }
             }
@@ -441,23 +441,23 @@ public class BPlusTree <T> {
         return values;
     }
 
-    public BPlusTree(int m) {
+    public BPlusTreeOld(int m) {
         this.m = m;
         this.root = null;
     }
 
-    public class Node <T> {
-        InternalNode<T> parent;
+    public class Node {
+        InternalNode parent;
     }
 
-    private class InternalNode <T> extends Node {
+    private class InternalNode extends Node {
         int maxDegree;
         int minDegree;
         int degree;
-        InternalNode<T> leftSibling;
-        InternalNode<T> rightSibling;
-        Comparable[] keys;
-        Node<T>[] childPointers;
+        InternalNode leftSibling;
+        InternalNode rightSibling;
+        Integer[] keys;
+        Node[] childPointers;
 
         private void appendChildPointer(Node pointer) {
             this.childPointers[degree] = pointer;
@@ -523,7 +523,7 @@ public class BPlusTree <T> {
             this.degree--;
         }
 
-        private InternalNode(int m, Comparable[] keys) {
+        private InternalNode(int m, Integer[] keys) {
             this.maxDegree = m;
             this.minDegree = (int) Math.ceil(m / 2.0);
             this.degree = 0;
@@ -531,7 +531,7 @@ public class BPlusTree <T> {
             this.childPointers = new Node[this.maxDegree + 1];
         }
 
-        private InternalNode(int m, Comparable[] keys, Node<T>[] pointers) {
+        private InternalNode(int m, Integer[] keys, Node[] pointers) {
             this.maxDegree = m;
             this.minDegree = (int) Math.ceil(m / 2.0);
             this.degree = linearNullSearch(pointers);
@@ -540,13 +540,13 @@ public class BPlusTree <T> {
         }
     }
 
-    public class LeafNode <T> extends Node {
+    public class LeafNode extends Node {
         int maxNumPairs;
         int minNumPairs;
         int numPairs;
         LeafNode leftSibling;
         LeafNode rightSibling;
-        DictionaryPair<T>[] dictionary;
+        DictionaryPair[] dictionary;
 
         public void delete(int index) {
             this.dictionary[index] = null;
@@ -598,19 +598,19 @@ public class BPlusTree <T> {
         }
     }
 
-    public class DictionaryPair <T> implements Comparable<DictionaryPair>{
-        Comparable key;
-        T value;
+    public class DictionaryPair implements Comparable<DictionaryPair> {
+        int key;
+        double value;
 
-        public DictionaryPair(Comparable key, T value) {
+        public DictionaryPair(int key, double value) {
             this.key = key;
             this.value = value;
         }
 
         public int compareTo(DictionaryPair o) {
-            if (key.compareTo(o.key) == 0) {
+            if (key == o.key) {
                 return 0;
-            } else if (key.compareTo(o.key) > 0) {
+            } else if (key > o.key) {
                 return 1;
             } else {
                 return -1;
@@ -619,8 +619,8 @@ public class BPlusTree <T> {
     }
 
     public static void main(String[] args) {
-        BPlusTree bpt = null;
-        bpt = new BPlusTree(3);
+        BPlusTreeOld bpt = null;
+        bpt = new BPlusTreeOld(3);
         bpt.insert(5, 33);
         bpt.insert(15, 21);
         bpt.insert(25, 31);

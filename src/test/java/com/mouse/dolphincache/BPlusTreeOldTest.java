@@ -23,25 +23,25 @@ import java.util.stream.Collectors;
  * @date 2022/8/26 21:03
  */
 @SpringBootTest
-public class BPlusTreeTest {
+public class BPlusTreeOldTest {
     @Test
     void multiSearch() {
         for (int m = 2; m < 10; m++) {
             searchRange(m);
-            searchIndex(m);
-            searchDuplicateKey(m);
+//            searchIndex(m);
+//            searchDuplicateKey(m);
         }
     }
 
     void searchDuplicateKey(int m) {
         val bTree = getBTree();
-        BPlusTree<Double> bPlusTree = new BPlusTree(m);
+        BPlusTreeOld bPlusTreeOld = new BPlusTreeOld(m);
         val list = new ArrayList<Integer>();
         val r = new Random();
         for (int i = 0; i < 100000; i++) {
             val key = r.nextInt(2000);
             val value = r.nextDouble() * 1000d;
-            bPlusTree.insert(key, value);
+            bPlusTreeOld.insert(key, value);
             list.add(key);
             try {
                 bTree.addValue( new Value(key), Double.valueOf(value).hashCode());
@@ -52,7 +52,7 @@ public class BPlusTreeTest {
 
         val sw = new StopWatch();
         sw.start("b+tree");
-        val result = bPlusTree.search(1000, 1000, null);
+        val result = bPlusTreeOld.search(1000, 1000);
         sw.stop();
         sw.start("stream");
         val result2 = list.stream().filter((i)->  {
@@ -60,25 +60,49 @@ public class BPlusTreeTest {
         }).collect(Collectors.toList());
         sw.stop();
 
+        sw.start("btree4j");
+        val result3 = new ArrayList<>();
+
+        try {
+            bTree.search(new BasicIndexQuery.IndexConditionBW(new Value(1000), new Value(1000)),
+                    new BTreeCallback() {
+
+                        @Override
+                        public boolean indexInfo(Value value, long pointer) {
+                            //System.out.println(pointer);
+                            result3.add(pointer);
+                            return true;
+                        }
+
+                        @Override
+                        public boolean indexInfo(Value key, byte[] value) {
+                            throw new UnsupportedOperationException();
+                        }
+                    });
+        } catch (BTreeException e) {
+            e.printStackTrace();
+        }
+        sw.stop();
 
         System.out.println("searchDuplicateKey m="+ m
                 +" result=" + result.size()
                 + "result2 =" +result2.size()
+                + "result3 =" +result3.size()
                 + sw.prettyPrint());
     }
 
     void searchRange(int m) {
 //        val bTree = getBTree();
-        BPlusTree<Integer> bPlusTree = new BPlusTree(m);
+        BPlusTreeOld bPlusTreeOld = new BPlusTreeOld(m);
         val list = new ArrayList<Integer>();
         val r = new Random();
         for (int i = 0; i < 1000000; i++) {
-//            if (i > 1000 && i < 1050) {
-//                continue;
-//            }
+            if (i > 1000 && i < 1050) {
+                continue;
+            }
             val key = r.nextInt(2000);
             val value = r.nextDouble() * 1000d;
-            bPlusTree.insert(i,i);
+            bPlusTreeOld.insert(i,i);
             list.add(i);
 //            try {
 //                bTree.addValue( new Value(key), key);
@@ -92,7 +116,7 @@ public class BPlusTreeTest {
 
         val sw = new StopWatch();
         sw.start("b+tree");
-        val result = bPlusTree.search(1020, 1030, (key, value) -> key.compareTo(1020) > 0 && key.compareTo(1032) <= 0);
+        val result = bPlusTreeOld.search(1020, 1030);
         sw.stop();
         sw.start("stream");
         val result2 = list.stream().filter((i)->  {
@@ -129,20 +153,20 @@ public class BPlusTreeTest {
     }
 
     void searchIndex(int m) {
-        BPlusTree bPlusTree = new BPlusTree(m);
+        BPlusTreeOld bPlusTreeOld = new BPlusTreeOld(m);
         val list = new ArrayList<Integer>();
         val r = new Random();
-        for (int i = 0; i < 10000; i++) {
+        for (int i = 0; i < 100000; i++) {
             val key = r.nextInt(2000);
             val value = r.nextDouble() * 1000d;
-            bPlusTree.insert(key, value);
+            bPlusTreeOld.insert(key, value);
             list.add(key);
         }
 
         val sw = new StopWatch();
         sw.start("b+tree");
         val target = 1000;
-        val result = bPlusTree.search(target);
+        val result = bPlusTreeOld.search(target);
         sw.stop();
         sw.start("stream");
         val result2 = list.stream().filter((i)->  {
