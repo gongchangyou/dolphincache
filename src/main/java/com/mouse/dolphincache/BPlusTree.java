@@ -1,6 +1,7 @@
 // Searching on a B+ tree in Java
 package com.mouse.dolphincache;
 
+import lombok.Data;
 import lombok.val;
 import org.springframework.util.Assert;
 import org.springframework.util.StopWatch;
@@ -10,6 +11,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
+@Data
 public class BPlusTree <T> {
     int m;
     InternalNode<T> root;
@@ -429,13 +431,19 @@ public class BPlusTree <T> {
         Assert.notNull(condition, "please set condition of bplustree search");
 
         ArrayList<T> values = new ArrayList<>();
-
+val sw = new StopWatch();
         //确定起点和终点
-        LeafNode currNode = getLeftMostLeafNode(lowerBound);
+sw.start("left");
+        LeafNode leftNode = getLeftMostLeafNode(lowerBound);
+sw.stop();
+sw.start("right");
         LeafNode rightNode = getRightMostLeafNode(upperBound);
+sw.stop();
+sw.start("scan");
+        var currNode = leftNode;
         while (currNode != rightNode.rightSibling) {
 
-            DictionaryPair dps[] = currNode.dictionary;
+            DictionaryPair<T> dps[] = currNode.dictionary;
             for (DictionaryPair<T> dp : dps) {
 
                 if (dp == null) {
@@ -449,7 +457,10 @@ public class BPlusTree <T> {
             currNode = currNode.rightSibling;
 
         }
-
+sw.stop();
+System.out.println("start="+lowerBound
+    +"end="+upperBound
+    + sw.prettyPrint());
         return values;
     }
 

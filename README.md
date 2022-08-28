@@ -9,8 +9,8 @@ b+tree based cache
 2. 如果我们做成一棵真正的B+树, 把value放到leaf上 ，且 每个leafNode指向下一个leaf(sibling)， 我想范围查询的速度会快很多
 
 BPlusTree 在元素为1000时,效果不明显，耗时大约是流式查找的20%~100%
-100,000~ 1,000,000的效果最好, 耗时会锐减到list查找的百分之一!
-
+总数为100,000~ 1,000,000，且每次范围查询的范围不太大(相邻的500个)的效果最好, 耗时会锐减到list查找的百分之一!
+具体可以执行 LocalCacheTest.personTest
 
 
 ### 开源组件 btree4j

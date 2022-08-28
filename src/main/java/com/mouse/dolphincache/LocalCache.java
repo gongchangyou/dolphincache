@@ -38,6 +38,7 @@ public class LocalCache<T> {
             if (f.getAnnotation(QuerySqlField.class) != null) {
                 val key = f.getDeclaringClass().getName() + "#"  + f.getName();
                 if(!bPlusTreeMap.containsKey(key)) {
+                    val tree = new BPlusTree<>(m);
                     bPlusTreeMap.put(key, new BPlusTree<>(m));
                 }
                 f.setAccessible(true);

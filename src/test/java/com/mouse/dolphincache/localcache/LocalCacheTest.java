@@ -23,7 +23,7 @@ public class LocalCacheTest {
     void personTest() {
         LocalCache<Person> lc = LocalCache.<Person>builder().build();
         val list = new ArrayList<Person>();
-        for (int i = 0; i < 10000; i++) {
+        for (int i = 0; i < 100000; i++) {
             val p = Person.builder()
                     .id(i)
                     .name("name" + i)
