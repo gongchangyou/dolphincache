@@ -1,9 +1,14 @@
 // Searching on a B+ tree in Java
 package com.mouse.dolphincache;
 
+import lombok.val;
+import org.springframework.util.Assert;
+import org.springframework.util.StopWatch;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.List;
 
 public class BPlusTree <T> {
     int m;
@@ -360,7 +365,7 @@ public class BPlusTree <T> {
 
     private LeafNode getRightMostLeafNode(Comparable upperBound) {
         //从root的 找到 lowerBound的 那个leftNode
-        Node currNode = this.root;
+        Node currNode = (this.root == null) ? this.firstLeaf : this.root;
         while (currNode != null) {
             //找到了
             if (currNode instanceof  LeafNode) {
@@ -385,23 +390,29 @@ public class BPlusTree <T> {
 
     private LeafNode getLeftMostLeafNode(Comparable lowerBound) {
         //从root的 找到 lowerBound的 那个leftNode
-        Node currNode = this.root;
+        Node currNode = (this.root == null) ? this.firstLeaf : this.root;
         while (currNode != null) {
             //找到了
             if (currNode instanceof  LeafNode) {
                 return (LeafNode) currNode;
             }
-            for (int i = 0; i < ((InternalNode) currNode).keys.length; i++) {
 
+            Node lastNode = null;
+            boolean breakFlag = false;
+            for (int i = 0; i < ((InternalNode) currNode).keys.length; i++) {
                 if (((InternalNode) currNode).keys[i] != null) {
-                    if (((InternalNode) currNode).keys[i].compareTo(lowerBound) > 0) {
+                    lastNode = ((InternalNode) currNode).childPointers[i];
+                    if (((InternalNode) currNode).keys[i].compareTo(lowerBound) >= 0) {
                         currNode = ((InternalNode) currNode).childPointers[i];
+                        breakFlag = true;
                         break;
                     }
-                } else {
-                    currNode = ((InternalNode) currNode).childPointers[i];
-                    break;
                 }
+            }
+
+            //如果遍历完了还没有，就以currNo 最后一个为起点
+            if (!breakFlag) {
+                currNode = lastNode;
             }
         }
 
@@ -414,13 +425,14 @@ public class BPlusTree <T> {
      * @param upperBound
      * @return
      */
-    public ArrayList<T> search(Comparable lowerBound, Comparable upperBound, Condition<T> condition) {
+    public List<T> search(Comparable lowerBound, Comparable upperBound, Condition<T> condition) {
+        Assert.notNull(condition, "please set condition of bplustree search");
+
         ArrayList<T> values = new ArrayList<>();
 
         //确定起点和终点
         LeafNode currNode = getLeftMostLeafNode(lowerBound);
         LeafNode rightNode = getRightMostLeafNode(upperBound);
-
         while (currNode != rightNode.rightSibling) {
 
             DictionaryPair dps[] = currNode.dictionary;
@@ -430,7 +442,7 @@ public class BPlusTree <T> {
                     break;
                 }
 
-                if (condition == null || condition.check(dp.key, dp.value)) {
+                if (condition.check(dp.key, dp.value)) {
                     values.add(dp.value);
                 }
             }

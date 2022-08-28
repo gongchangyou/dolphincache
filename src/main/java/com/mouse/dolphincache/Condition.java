@@ -6,7 +6,7 @@ package com.mouse.dolphincache;
  * @date 2022/8/28 17:56
  */
 @FunctionalInterface
-interface Condition <T>
+public interface Condition <T>
 {
     boolean check(Comparable key, T value);
 }

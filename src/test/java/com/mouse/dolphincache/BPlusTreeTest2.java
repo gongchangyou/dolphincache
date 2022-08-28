@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
  * @date 2022/8/26 21:03
  */
 @SpringBootTest
-public class BPlusTreeTest {
+public class BPlusTreeTest2 {
     @Test
     void multiSearch() {
         for (int m = 2; m < 10; m++) {
