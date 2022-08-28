@@ -421,13 +421,8 @@ public class BPlusTree {
      */
     public ArrayList<Double> search(int lowerBound, int upperBound) {
         ArrayList<Double> values = new ArrayList<Double>();
-        StopWatch sw = new StopWatch("bplustree search");
-        sw.start("getLeftMostLeftNode");
         LeafNode currNode = getLeftMostLeftNode(lowerBound);
         LeafNode rightNode = getRightMostLeftNode(upperBound);
-        sw.stop();
-
-        sw.start("right sibling");
 
         while (currNode != rightNode.rightSibling) {
 
@@ -445,9 +440,7 @@ public class BPlusTree {
             currNode = currNode.rightSibling;
 
         }
-        sw.stop();
 
-        System.out.println(sw.prettyPrint());
         return values;
     }
 
