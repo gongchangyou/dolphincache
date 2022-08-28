@@ -1,5 +1,6 @@
 package com.mouse.dolphincache.model;
 
+import com.mouse.dolphincache.annotations.QuerySqlField;
 import lombok.Builder;
 import lombok.Data;
 
@@ -13,6 +14,8 @@ import lombok.Data;
 public class Person {
     private long id;
     private String name;
+
+    @QuerySqlField(index = true)
     private int age;
 
 }

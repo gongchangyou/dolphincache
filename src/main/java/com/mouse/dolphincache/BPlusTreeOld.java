@@ -3,6 +3,7 @@ package com.mouse.dolphincache;
 
 import java.util.*;
 
+@Deprecated
 public class BPlusTreeOld {
     int m;
     InternalNode root;
