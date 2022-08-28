@@ -1,10 +1,12 @@
 // Searching on a B+ tree in Java
 package com.mouse.dolphincache;
 
+import org.springframework.util.StopWatch;
+
 import java.util.*;
 
 /**
- * 这根本不是B+树 而是棵B树，每个node上都有value
+ * 这根本不是B+树 没有再平衡策略，顺序insert 就是极端情况，只有right sibling
  */
 public class BPlusTree {
     int m;
@@ -361,20 +363,73 @@ public class BPlusTree {
         }
     }
 
+    private LeafNode getRightMostLeftNode(int upperBound) {
+        //从root的 找到 lowerBound的 那个leftNode
+        Node currNode = this.root;
+        while (currNode != null) {
+            //找到了
+            if (currNode instanceof  LeafNode) {
+                return (LeafNode) currNode;
+            }
+            for (int i = 0; i < ((InternalNode) currNode).keys.length; i++) {
+
+                if (((InternalNode) currNode).keys[i] != null) {
+                    if (((InternalNode) currNode).keys[i] > upperBound) {
+                        currNode = ((InternalNode) currNode).childPointers[i];
+                        break;
+                    }
+                } else {
+                    currNode = ((InternalNode) currNode).childPointers[i];
+                    break;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private LeafNode getLeftMostLeftNode(int lowerBound) {
+        //从root的 找到 lowerBound的 那个leftNode
+        Node currNode = this.root;
+        while (currNode != null) {
+            //找到了
+            if (currNode instanceof  LeafNode) {
+                return (LeafNode) currNode;
+            }
+            for (int i = 0; i < ((InternalNode) currNode).keys.length; i++) {
+
+                if (((InternalNode) currNode).keys[i] != null) {
+                    if (((InternalNode) currNode).keys[i] > lowerBound) {
+                        currNode = ((InternalNode) currNode).childPointers[i];
+                        break;
+                    }
+                } else {
+                    currNode = ((InternalNode) currNode).childPointers[i];
+                    break;
+                }
+            }
+        }
+
+        return null;
+    }
     /**
      * key range: [lowerBound,upperBound]
      * latency too large
-     * maybe there's no link between leafnodes
      * @param lowerBound
      * @param upperBound
      * @return
      */
     public ArrayList<Double> search(int lowerBound, int upperBound) {
-
         ArrayList<Double> values = new ArrayList<Double>();
+        StopWatch sw = new StopWatch("bplustree search");
+        sw.start("getLeftMostLeftNode");
+        LeafNode currNode = getLeftMostLeftNode(lowerBound);
+        LeafNode rightNode = getRightMostLeftNode(upperBound);
+        sw.stop();
 
-        LeafNode currNode = this.firstLeaf;
-        while (currNode != null) {
+        sw.start("right sibling");
+
+        while (currNode != rightNode.rightSibling) {
 
             DictionaryPair dps[] = currNode.dictionary;
             for (DictionaryPair dp : dps) {
@@ -383,14 +438,16 @@ public class BPlusTree {
                     break;
                 }
 
-                if (lowerBound <= dp.key && dp.key <= upperBound) {
+                if (dp.key <= upperBound) {
                     values.add(dp.value);
                 }
             }
             currNode = currNode.rightSibling;
 
         }
+        sw.stop();
 
+        System.out.println(sw.prettyPrint());
         return values;
     }
 

@@ -34,7 +34,6 @@ public class BPlusTreeTest {
         }
     }
 
-    @Test
     void searchDuplicateKey(int m) {
         val bTree = getBTree();
         BPlusTree bPlusTree = new BPlusTree(m);
@@ -94,23 +93,23 @@ public class BPlusTreeTest {
     }
 
     void searchRange(int m) {
-        val bTree = getBTree();
+//        val bTree = getBTree();
         BPlusTree bPlusTree = new BPlusTree(m);
         val list = new ArrayList<Integer>();
         val r = new Random();
         for (int i = 0; i < 1000000; i++) {
             val key = r.nextInt(2000);
             val value = r.nextDouble() * 1000d;
-            bPlusTree.insert(key, value);
-            list.add(key);
-            try {
-                bTree.addValue( new Value(key), key);
-            } catch (BTreeException e) {
-                System.out.println(e);
-//                e.printStackTrace();
-            } catch (Exception e) {
-                System.out.println(e);
-            }
+            bPlusTree.insert(i,i);
+            list.add(i);
+//            try {
+//                bTree.addValue( new Value(key), key);
+//            } catch (BTreeException e) {
+//                System.out.println(e);
+////                e.printStackTrace();
+//            } catch (Exception e) {
+//                System.out.println(e);
+//            }
         }
 
         val sw = new StopWatch();
@@ -123,35 +122,34 @@ public class BPlusTreeTest {
         }).collect(Collectors.toList());
         sw.stop();
 
-        sw.start("btree4j");
-        val result3 = new ArrayList<>();
-        try {
-            bTree.search(new BasicIndexQuery.IndexConditionBW(new Value(1000), new Value(2000)),
-                    new BTreeCallback() {
-
-                        @Override
-                        public boolean indexInfo(Value value, long pointer) {
-                            //System.out.println(pointer);
-                            result3.add(pointer);
-                            return true;
-                        }
-
-                        @Override
-                        public boolean indexInfo(Value key, byte[] value) {
-                            throw new UnsupportedOperationException();
-                        }
-                    });
-        } catch (BTreeException e) {
-            e.printStackTrace();
-        }
-        sw.stop();
+//        sw.start("btree4j");
+//        val result3 = new ArrayList<>();
+//        try {
+//            bTree.search(new BasicIndexQuery.IndexConditionBW(new Value(1000), new Value(2000)),
+//                    new BTreeCallback() {
+//
+//                        @Override
+//                        public boolean indexInfo(Value value, long pointer) {
+//                            //System.out.println(pointer);
+//                            result3.add(pointer);
+//                            return true;
+//                        }
+//
+//                        @Override
+//                        public boolean indexInfo(Value key, byte[] value) {
+//                            throw new UnsupportedOperationException();
+//                        }
+//                    });
+//        } catch (BTreeException e) {
+//            e.printStackTrace();
+//        }
+//        sw.stop();
 
         System.out.println("searchRange m="+ m+" result=" + result.size() + "result2 =" +result2.size()
-                + "result3=" + result3.size()
+//                + "result3=" + result3.size()
                 + sw.prettyPrint());
     }
 
-    @Test
     void searchIndex(int m) {
         BPlusTree bPlusTree = new BPlusTree(m);
         val list = new ArrayList<Integer>();
