@@ -1,21 +1,17 @@
 package com.mouse.dolphincache;
 
 import com.mouse.dolphincache.annotations.QuerySqlField;
+import com.mouse.dolphincache.reflect.PropertyFunc;
+import com.mouse.dolphincache.reflect.ReflectionFieldName;
 import lombok.Builder;
-import lombok.Data;
 import lombok.SneakyThrows;
 import lombok.val;
-import org.springframework.cglib.core.ReflectUtils;
-import org.springframework.util.Assert;
-import org.springframework.util.ReflectionUtils;
-import org.springframework.util.comparator.ComparableComparator;
 
-import javax.annotation.PostConstruct;
 import java.lang.reflect.Field;
-import java.lang.reflect.ParameterizedType;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 /**
  * @author gongchangyou
@@ -47,8 +43,11 @@ public class LocalCache<T> {
         }
     }
 
-    public List<T> search(Field field, Comparable lowerBound, Comparable upperBound) {
-        val key = field.getDeclaringClass().getName() + "#"  + field.getName();
+    public List<T> search(PropertyFunc<T, ?> property, Comparable lowerBound, Comparable upperBound) {
+        val className = ReflectionFieldName.getClassName(property);
+        val fieldName = ReflectionFieldName.getFieldName(property);
+
+        val key = className + "#"  + fieldName;
         return bPlusTreeMap.get(key).search(lowerBound, upperBound, (k, value) -> {
             return k.compareTo(lowerBound) >=0 && k.compareTo(upperBound) <=0;
         });

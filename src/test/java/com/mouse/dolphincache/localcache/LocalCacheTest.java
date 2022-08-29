@@ -40,7 +40,7 @@ public class LocalCacheTest {
             val start = r.nextInt(end);
             val sw = new StopWatch();
             sw.start("b+tree");
-            val result = lc.search(Person.class.getDeclaredField("age"), start, end);
+            val result = lc.search(Person::getAge, start, end);
             sw.stop();
             sw.start("stream");
             list.stream().filter(p -> p.getAge() >= start && p.getAge() <= end).collect(Collectors.toList());
@@ -76,7 +76,7 @@ public class LocalCacheTest {
             val start = 1000;
             val sw = new StopWatch();
             sw.start("b+tree");
-            val result = lc.search(Person.class.getDeclaredField("age"), start, end);
+            val result = lc.search(Person::getAge, start, end);
             sw.stop();
             sw.start("stream");
             list.stream().filter(p -> p.getAge() >= start && p.getAge() <= end).collect(Collectors.toList());
